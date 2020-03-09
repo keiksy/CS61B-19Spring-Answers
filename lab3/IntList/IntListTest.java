@@ -58,6 +58,14 @@ public class IntListTest {
     }
 
     @Test
+    public void testReverse() {
+        IntList A = IntList.of(1,2,3);
+        IntList B = IntList.of(3,2,1);
+        assertEquals(B, IntList.reverse(A));
+        assertEquals(null, IntList.reverse(null));
+    }
+
+    @Test
     public void testCatenate() {
         IntList A = IntList.of(1, 2, 3);
         IntList B = IntList.of(4, 5, 6);

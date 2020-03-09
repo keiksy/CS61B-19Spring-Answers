@@ -1,5 +1,6 @@
 package creatures;
 
+import edu.princeton.cs.algs4.StdRandom;
 import huglife.Creature;
 import huglife.Direction;
 import huglife.Action;
@@ -30,14 +31,16 @@ public class Plip extends Creature {
      */
     private int b;
 
+    public static final double MOVE_VALUE = -0.15;
+    public static final double STAY_VALUE = +0.2;
     /**
      * creates plip with energy equal to E.
      */
     public Plip(double e) {
         super("plip");
-        r = 0;
-        g = 0;
-        b = 0;
+        r = 99;
+        g = (int)(96*energy()+63);
+        b = 76;
         energy = e;
     }
 
@@ -56,9 +59,17 @@ public class Plip extends Creature {
      * linearly in between these two extremes. It's not absolutely vital
      * that you get this exactly correct.
      */
+
     public Color color() {
-        g = 63;
+        g = (int)(96*energy()+63);
         return color(r, g, b);
+    }
+
+    private void updateEneegy(double change) {
+        double tobe = energy()+change;
+        if (tobe>2) tobe = 2;
+        if (tobe<0) tobe = 0;
+        energy = tobe;
     }
 
     /**
@@ -75,6 +86,7 @@ public class Plip extends Creature {
      */
     public void move() {
         // TODO
+        updateEneegy(MOVE_VALUE);
     }
 
 
@@ -83,6 +95,7 @@ public class Plip extends Creature {
      */
     public void stay() {
         // TODO
+        updateEneegy(STAY_VALUE);
     }
 
     /**
@@ -91,7 +104,9 @@ public class Plip extends Creature {
      * Plip.
      */
     public Plip replicate() {
-        return this;
+        Plip offspring = new Plip(energy()*0.5);
+        energy *= 0.5;
+        return offspring;
     }
 
     /**
@@ -112,19 +127,19 @@ public class Plip extends Creature {
         Deque<Direction> emptyNeighbors = new ArrayDeque<>();
         boolean anyClorus = false;
         // TODO
-        // (Google: Enhanced for-loop over keys of NEIGHBORS?)
-        // for () {...}
-
-        if (false) { // FIXME
-            // TODO
+        for(Map.Entry<Direction, Occupant> e:neighbors.entrySet()) {
+            if(e.getValue().name() == "empty") emptyNeighbors.addLast(e.getKey());
+            else if(e.getValue().name() == "clorus") anyClorus=true;
         }
 
-        // Rule 2
-        // HINT: randomEntry(emptyNeighbors)
-
-        // Rule 3
-
-        // Rule 4
-        return new Action(Action.ActionType.STAY);
+        if (emptyNeighbors.size()==0) {
+            return new Action(Action.ActionType.STAY);
+        } else if (energy()>1.0) {
+            return new Action(Action.ActionType.REPLICATE, emptyNeighbors.removeFirst());
+        } else if (anyClorus) {
+            return StdRandom.uniform()>0.5 ? new Action(Action.ActionType.STAY) : new Action(Action.ActionType.MOVE, emptyNeighbors.removeFirst());
+        } else {
+            return new Action(Action.ActionType.STAY);
+        }
     }
 }
