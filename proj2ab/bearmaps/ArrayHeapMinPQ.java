@@ -1,39 +1,6 @@
 package bearmaps;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
-
-class ArrayListHeap<T> extends ArrayList<T> {
-
-    public T getNodeAt(int idx) {
-        return get(idx-1);
-    }
-
-    public void setNodeAt(int idx, T newNode) {
-        set(idx-1, newNode);
-    }
-
-    public T getParent(int idx) {
-        if(idx<=1) return getNodeAt(1);
-        return getNodeAt(idx/2);
-    }
-
-    public T getLeftSon(int idx) {
-        if(idx>size() || idx*2>size()) throw new RuntimeException();
-        return getNodeAt(idx*2);
-    }
-
-    public T getRightSon(int idx) {
-        if(idx>size() || idx*2+1>size()) throw new RuntimeException();
-        return getNodeAt(idx*2+1);
-    }
-
-    public void swap(int idxSrc, int idxDst) {
-        T t = getNodeAt(idxSrc);
-        set(idxSrc-1, getNodeAt(idxDst));
-        set(idxDst-1, t);
-    }
-}
 
 public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T>{
 
@@ -57,15 +24,15 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T>{
         }
     }
 
-    ArrayListHeap<Node> pq = new ArrayListHeap<>();
+    ListBasedHeap<Node> pq = new ArrayListHeap<>();
 
     private void adjust(int idx) {
         if(idx==1
             ||pq.getParent(idx).compareTo(pq.getNodeAt(idx))==0
                 || pq.getParent(idx).compareTo(pq.getNodeAt(idx))<0) return;
         else {
-            pq.swap(idx, (idx/2)-1);
-            adjust((idx/2)-1);
+            pq.swap(idx, idx/2);
+            adjust(idx/2);
         }
     }
 
@@ -95,37 +62,37 @@ public class ArrayHeapMinPQ<T> implements ExtrinsicMinPQ<T>{
     @Override
     public T removeSmallest() {
         pq.swap(1, pq.size());
-        adjustDown(1);
-        return pq.getNodeAt(pq.size()).item;
+        Node oldVal = pq.removeNodeAt(pq.size());
+        if(size() > 1)adjustDown(1);
+        return oldVal.item;
     }
 
     private void adjustDown(int idx) {
         Node leftSon = pq.getLeftSon(idx), rightSon = pq.getRightSon(idx);
-        if(pq.getNodeAt(idx).compareTo(leftSon)<0 &&
-                pq.getNodeAt(idx).compareTo(rightSon)<0) return;
-        Node min;
-        if (leftSon.compareTo(rightSon)<0) {
-            if (leftSon.compareTo(pq.getNodeAt(idx))<0) {
-                min = leftSon;
-            } else {
-                min = pq.getNodeAt(idx);
-            }
-        } else {
-            if (rightSon.compareTo(pq.getNodeAt(idx))<0) {
-                min = rightSon;
-            } else {
-                min = pq.getNodeAt(idx);
+        if(leftSon!= null && pq.getNodeAt(idx).compareTo(leftSon)<0 &&
+                rightSon!=null && pq.getNodeAt(idx).compareTo(rightSon)<0) return;
+
+        //calculate the least node of three nodes.
+        Node min = pq.getNodeAt(idx);
+        if (leftSon==null && rightSon!=null) {
+            if (rightSon.compareTo(min)<0) min = rightSon;
+        } else if (leftSon!=null && rightSon==null) {
+            if (leftSon.compareTo(min)<0) min = leftSon;
+        } else if (leftSon!=null && rightSon!=null) {
+            if (leftSon.compareTo(rightSon)<0) {
+                if (leftSon.compareTo(min)<0) min = leftSon;
+            } else if (rightSon.compareTo(min)<0){
+                if (rightSon.compareTo(min)<0) min = rightSon;
             }
         }
-        if (min == pq.getNodeAt(idx)) {
-            return;
-        } else if (min == pq.getLeftSon(idx)) {
+
+        if (min == leftSon) {
             pq.swap(idx, idx*2);
             adjustDown(idx*2);
-        } else {
+        } else if (min == rightSon) {
             pq.swap(idx, idx*2+1);
             adjustDown(idx*2+1);
-        }
+        } else return;
     }
 
     @Override

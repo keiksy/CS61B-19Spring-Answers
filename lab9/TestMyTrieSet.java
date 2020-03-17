@@ -22,6 +22,17 @@ public class TestMyTrieSet {
         }
     }
 
+    @Test
+    public void testAdd() {
+        MyTrieSet myTrieSet = new MyTrieSet();
+        myTrieSet.add("a");
+        myTrieSet.add("ab");
+        myTrieSet.add("cdbas");
+        myTrieSet.add("cdc");
+        assertTrue(myTrieSet.contains("cdbas"));
+        assertFalse(myTrieSet.contains("abababba"));
+    }
+
     // assumes add works
     @Test
     public void sanityContainsTest() {
