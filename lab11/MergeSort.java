@@ -43,7 +43,13 @@ public class MergeSort {
     private static <Item extends Comparable> Queue<Queue<Item>>
             makeSingleItemQueues(Queue<Item> items) {
         // Your code here!
-        return null;
+        Queue<Queue<Item>> ans = new Queue<>();
+        while(!items.isEmpty()) {
+            Queue<Item> newq = new Queue<>();
+            newq.enqueue(items.dequeue());
+            ans.enqueue(newq);
+        }
+        return ans;
     }
 
     /**
@@ -62,7 +68,11 @@ public class MergeSort {
     private static <Item extends Comparable> Queue<Item> mergeSortedQueues(
             Queue<Item> q1, Queue<Item> q2) {
         // Your code here!
-        return null;
+        Queue<Item> ans = new Queue<>();
+        for(int i = 0; i < q1.size()+q2.size(); i++) {
+            ans.enqueue(getMin(q1, q2));
+        }
+        return ans;
     }
 
     /**
@@ -78,6 +88,23 @@ public class MergeSort {
     public static <Item extends Comparable> Queue<Item> mergeSort(
             Queue<Item> items) {
         // Your code here!
-        return items;
+        //REALLY UGLY CODE BUT I HAVE NO IDEA ABOUT HOW TO IMPROVE IT.
+        //FUUUUUUUUUUUUUUUUUUCK
+        if (items.size() == 1) {
+            return items;
+        } else if (items.size() == 2) {
+            Queue<Queue<Item>> q2 = makeSingleItemQueues(items);
+            Queue<Item> q0 = q2.dequeue(), q1 = q2.dequeue();
+            return mergeSortedQueues(q0, q1);
+        } else {
+            int half = items.size()/2;
+            Queue<Item> fhalf = new Queue<>(), lhalf = new Queue<>();
+            for(int i = 0; i < half; i++) fhalf.enqueue(items.dequeue());
+            int left = items.size();
+            for(int i = 0; i < left; i++) lhalf.enqueue(items.dequeue());
+            fhalf = mergeSort(fhalf);
+            lhalf = mergeSort(lhalf);
+            return mergeSortedQueues(fhalf, lhalf);
+        }
     }
 }

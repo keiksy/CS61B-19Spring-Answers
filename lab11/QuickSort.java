@@ -1,5 +1,8 @@
 import edu.princeton.cs.algs4.Queue;
 
+import java.util.Iterator;
+import java.util.ListIterator;
+
 public class QuickSort {
     /**
      * Returns a new queue that contains the given queues catenated together.
@@ -58,6 +61,13 @@ public class QuickSort {
             Queue<Item> unsorted, Item pivot,
             Queue<Item> less, Queue<Item> equal, Queue<Item> greater) {
         // Your code here!
+        Iterator<Item> iterator = unsorted.iterator();
+        while (iterator.hasNext()) {
+            Item cur = iterator.next();
+            if (cur.compareTo(pivot) < 0) less.enqueue(cur);
+            else if (cur.compareTo(pivot) > 0) greater.enqueue(cur);
+            else equal.enqueue(cur);
+        }
     }
 
     /**
@@ -69,6 +79,12 @@ public class QuickSort {
     public static <Item extends Comparable> Queue<Item> quickSort(
             Queue<Item> items) {
         // Your code here!
-        return items;
+        if (items.size() <= 1) return items;
+        Item pivot = items.peek();
+        Queue<Item> less = new Queue<>(), equal = new Queue<>(), greater = new Queue<>();
+        partition(items, pivot, less, equal, greater);
+        less = quickSort(less);
+        greater = quickSort(greater);
+        return catenate(less, catenate(equal, greater));
     }
 }

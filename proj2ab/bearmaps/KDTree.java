@@ -4,7 +4,7 @@ import java.util.List;
 
 public class KDTree {
 
-    class Node {
+    private static class Node {
         Point coord;
         int level;
         Node left;
@@ -30,57 +30,52 @@ public class KDTree {
         return nearest;
     }
 
-    private void nearHelper(Node curN, Point target) {
-        if (curN == null) return;
-        Point cur = curN.coord;
-        if (Point.distance(cur, target) < Point.distance(nearest, target)) nearest = cur;
-        if (curN.level%2 == 0) {
-            if (target.getY() <= cur.getY()) {
-                nearHelper(curN.left, target);
-                if (Point.distance(target, nearest) > Point.distance(target, new Point(cur.getX(), target.getY())))
-                    nearHelper(curN.right, target);
-            } else {
-                nearHelper(curN.right, target);
-                if (Point.distance(target, nearest) > Point.distance(target, new Point(cur.getX(), target.getY())))
-                    nearHelper(curN.left, target);
-            }
-        } else {
-            if (target.getX() <= cur.getX()) {
-                nearHelper(curN.left, target);
-                if (Point.distance(target, nearest) > Point.distance(target, new Point(cur.getX(), target.getY())))
-                    nearHelper(curN.right, target);
-            } else {
-                nearHelper(curN.right, target);
-                if (Point.distance(target, nearest) > Point.distance(target, new Point(cur.getX(), target.getY())))
-                    nearHelper(curN.left, target);
-            }
-        }
-    }
-
     public void add(Point p) {
         if (root==null) root = new Node(p, 1);
         else addHelper(root, p);
     }
 
-    private void addHelper(Node cur, Point newP) {
-        Point curP = cur.coord;
-        if (curP.equals(newP)) return;
+    private boolean closerThanProjectPoint(Node cur, Point target) {
         if (cur.level%2 == 0) {
-            if (curP.getY() >= newP.getY()) {
-                if (cur.right == null) cur.right = new Node(newP, cur.level+1);
-                else addHelper(cur.right, newP);
-            } else {
-                if (cur.left == null) cur.left = new Node(newP, cur.level+1);
-                else addHelper(cur.left, newP);
-            }
+            return Point.distance(nearest, target) <= Point.distance(target, new Point(target.getX(), cur.coord.getY()));
         } else {
-            if (curP.getX() <= newP.getX()) {
-                if (cur.right == null) cur.right = new Node(newP, cur.level+1);
-                else addHelper(cur.right, newP);
-            } else {
-                if (cur.left == null) cur.left = new Node(newP, cur.level+1);
-                else addHelper(cur.left, newP);
-            }
+            return Point.distance(nearest, target) <= Point.distance(target, new Point(cur.coord.getX(), target.getY()));
+        }
+    }
+
+    private void nearHelper(Node curN, Point target) {
+        if (curN == null) return;
+        Point cur = curN.coord;
+        if (Point.distance(cur, target) < Point.distance(nearest, target)) nearest = cur;
+        Node choose_side = curN.left, another_side = curN.right;
+        if (lessThan(curN, target)) {
+            choose_side = curN.right;
+            another_side = curN.left;
+        }
+        nearHelper(choose_side, target);
+        if (!closerThanProjectPoint(curN, target)) nearHelper(another_side, target);
+    }
+
+    private boolean lessThan(Node cur, Point target) {
+        double targetPos, curPos;
+        if (cur.level%2 == 0) {
+            targetPos = target.getY();
+            curPos = cur.coord.getY();
+        } else {
+            targetPos = target.getX();
+            curPos = cur.coord.getX();
+        }
+        return curPos-targetPos <= 0;
+    }
+
+    private void addHelper(Node cur, Point newP) {
+        if (cur.coord.equals(newP)) return;
+        if (lessThan(cur, newP)) {
+            if (cur.right == null) cur.right = new Node(newP, cur.level+1);
+            else addHelper(cur.right, newP);
+        } else {
+            if (cur.left == null) cur.left = new Node(newP, cur.level+1);
+            else addHelper(cur.left, newP);
         }
     }
 }
