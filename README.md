@@ -5,5 +5,3 @@
 [CS61B-19Spring](https://sp19.datastructur.es/)
 
 [CS61B-19Fall](https://inst.eecs.berkeley.edu/~cs61b/fa19/)
-
-直接fork了staff的repo，所以repo名看起来怪怪的。
